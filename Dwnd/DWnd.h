@@ -13,6 +13,7 @@ public:
 		std::wstring title;
 		int index;
 		int rcid;
+		HWND hWnd;
 	};
 
 	DWnd(HMODULE hInstance, int rcid);
@@ -31,6 +32,7 @@ private:
 	HMODULE hInstance;
 	int rcid;
 	HWND mainHWnd;
+	double dpiFactor;
 	std::map<UINT, MsgHandler> msgHandlerMap;
 	std::map<WORD, MsgHandler> cmdHandlerMap;
 	// 多个tab的多个page集合

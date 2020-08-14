@@ -4,6 +4,7 @@
 std::map<HWND, DWnd*> DWnd::dWndThisMap;
 
 DWnd::DWnd(HMODULE hInstance, int rcid) {
+	this->dpiFactor = 1;
 	this->mainHWnd = nullptr;
 	this->hInstance = hInstance;
 	this->rcid = rcid;
@@ -68,23 +69,54 @@ INT_PTR WINAPI DWnd::WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		dWndThisMap[hWnd] = dwd;
 		dwd->mainHWnd = hWnd;
 
+		auto hdc = GetDC(hWnd);
+		dwd->dpiFactor = GetDeviceCaps(hdc, LOGPIXELSX) / 96.0;
+		ReleaseDC(hWnd, hdc);
+
 		// 处理tab的初始化
-		for (const auto& item : dwd->allTabPages) {
+		for (auto& item : dwd->allTabPages) {
 			auto tabid = item.first;
 			auto tabWnd = GetDlgItem(hWnd, tabid);
+			
 			RECT tabRect;
 			GetWindowRect(tabWnd, &tabRect);
+
+			auto left = 1 * dwd->dpiFactor;
+			auto top = 20 * dwd->dpiFactor;
+			auto sx = tabRect.right - tabRect.left - left * 2;
+			auto sy = tabRect.bottom - tabRect.top - top - dwd->dpiFactor;
 			
-			for (const auto& page : item.second) {
+			for (auto& page : item.second) {
 				TCITEM tie;
 				tie.mask = TCIF_TEXT;
 				tie.pszText = (WCHAR*)page.title.c_str();
 				TabCtrl_InsertItem(tabWnd, page.index, &tie);
 
 				if (page.rcid) {
-
+					auto tabHwnd = CreateDialog(dwd->hInstance, MAKEINTRESOURCE(page.rcid), tabWnd, NULL);
+					SetWindowPos(tabHwnd, HWND_TOP, left, top, sx, sy, SWP_HIDEWINDOW);
+					page.hWnd = tabHwnd;
 				}
 			}
+			// 必须要实现多次监听消息
+			dwd->AddMessageListener(WM_NOTIFY, [tabWnd, tabid, dwd](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+				switch (((LPNMHDR)lParam)->code)
+				{
+				case TCN_SELCHANGE:
+				{
+					int iPage = TabCtrl_GetCurSel(tabWnd);
+					for (auto& page : dwd->allTabPages[tabid]) {
+						if (page.hWnd) {
+							ShowWindow(page.hWnd, (iPage == page.index) ? SW_SHOW : SW_HIDE);
+						}
+					}
+
+					break;
+				}
+				default:
+					break;
+				}
+			});
 		}
 	}
 

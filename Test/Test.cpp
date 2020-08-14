@@ -28,7 +28,7 @@ int WINAPI WinMain(
     });
 
     dwd.AddTabPage(IDC_TAB1, { L"登录", 0, IDD_PAGE_1 });
-    dwd.AddTabPage(IDC_TAB1, { L"注册", 1 });
+    dwd.AddTabPage(IDC_TAB1, { L"注册", 1, IDD_PAGE_2 });
     dwd.AddTabPage(IDC_TAB1, { L"修改密码", 2 });
 
     return dwd.Run();
