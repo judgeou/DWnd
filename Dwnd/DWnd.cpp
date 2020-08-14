@@ -1,6 +1,13 @@
 #include "DWnd.h"
 #include <CommCtrl.h>
 
+template<typename T, typename... U>
+size_t GetFunctionAddress(std::function<T(U...)> f) {
+	typedef T(fnType)(U...);
+	fnType** fnPointer = f.template target<fnType*>();
+	return (size_t)*fnPointer;
+}
+
 std::map<HWND, DWnd*> DWnd::dWndThisMap;
 
 DWnd::DWnd(HMODULE hInstance, int rcid) {
@@ -47,14 +54,25 @@ INT_PTR DWnd::Run(bool selfMessageLoop)
 	}
 }
 
-void DWnd::AddMessageListener(UINT msg, MsgHandler cb)
+std::list<DWnd::MsgHandler>::const_iterator DWnd::AddMessageListener(UINT msg, MsgHandler cb)
 {
-	msgHandlerMap[msg] = cb;
+	auto& hamdlers = msgHandlerMap[msg];
+	hamdlers.push_back(cb);
+	auto index = hamdlers.cend();
+	index--;
+	return index;
 }
 
 void DWnd::AddCommandListener(int command, MsgHandler cb)
 {
 	cmdHandlerMap[command] = cb;
+}
+
+// 千万不要使用已经删除过的index，一定会出现异常
+void DWnd::RemoveMessageListener(UINT msg, std::list<DWnd::MsgHandler>::const_iterator index)
+{
+	auto& handlers = msgHandlerMap[msg];
+	handlers.erase(index);
 }
 
 void DWnd::AddTabPage(int tabid, const TabPage& page)
@@ -131,12 +149,9 @@ INT_PTR WINAPI DWnd::WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 INT_PTR DWnd::InternalWindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	auto cb = msgHandlerMap[msg];
-	if (cb) {
+	auto& cbset = msgHandlerMap[msg];
+	for (auto& cb : cbset) {
 		cb(hWnd, msg, wParam, lParam);
-		return TRUE;
 	}
-	else {
-		return FALSE;
-	}
+	return cbset.empty() ? FALSE : TRUE;
 }

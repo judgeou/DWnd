@@ -1,4 +1,5 @@
 #include <map>
+#include <list>
 #include <vector>
 #include <functional>
 #include <string>
@@ -20,8 +21,9 @@ public:
 	~DWnd();
 
 	INT_PTR Run(bool selfMessageLoop = true);
-	void AddMessageListener(UINT msg, MsgHandler cb);
+	std::list<DWnd::MsgHandler>::const_iterator AddMessageListener(UINT msg, MsgHandler cb);
 	void AddCommandListener(int command, MsgHandler cb);
+	void RemoveMessageListener(UINT msg, std::list<DWnd::MsgHandler>::const_iterator index);
 
 	void AddTabPage(int tabid, const TabPage& page);
 private:
@@ -33,8 +35,7 @@ private:
 	int rcid;
 	HWND mainHWnd;
 	double dpiFactor;
-	std::map<UINT, MsgHandler> msgHandlerMap;
+	std::map<UINT, std::list<MsgHandler>> msgHandlerMap;
 	std::map<WORD, MsgHandler> cmdHandlerMap;
-	// 多个tab的多个page集合
 	std::map<int, std::vector<TabPage>> allTabPages;
 };

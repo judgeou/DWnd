@@ -27,6 +27,18 @@ int WINAPI WinMain(
         SendMessage(hWnd, WM_CLOSE, 0, 0);
     });
 
+    auto cb1 = dwd.AddMessageListener(WM_LBUTTONUP, [](HWND hWnd, auto...) {
+        MessageBox(hWnd, L"拜拜了您", L"bye bye", MB_OK | MB_ICONINFORMATION);
+    });
+
+    auto cb2 = dwd.AddMessageListener(WM_LBUTTONUP, [](HWND hWnd, auto...) {
+        MessageBox(hWnd, L"拜拜了您", L"bye bye", MB_OK | MB_ICONINFORMATION);
+    });
+
+    dwd.AddCommandListener(IDC_BUTTON2, [&dwd, &cb1](auto...) {
+        dwd.RemoveMessageListener(WM_LBUTTONUP, cb1);
+    });
+
     dwd.AddTabPage(IDC_TAB1, { L"登录", 0, IDD_PAGE_1 });
     dwd.AddTabPage(IDC_TAB1, { L"注册", 1, IDD_PAGE_2 });
     dwd.AddTabPage(IDC_TAB1, { L"修改密码", 2 });
