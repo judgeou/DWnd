@@ -10,6 +10,11 @@ DWnd::DWnd(HMODULE hInstance, int rcid, HWND fatherHwnd) {
 	this->rcid = rcid;
 
 	mainHWnd = CreateDialogParam(hInstance, MAKEINTRESOURCE(rcid), fatherHwnd, WindProc, (LPARAM)this);
+	
+	// 如果有父窗口，则直接进入Run(false)
+	if (fatherHwnd) {
+		Run(false);
+	}
 }
 
 DWnd::~DWnd()

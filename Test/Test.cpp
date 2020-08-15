@@ -41,6 +41,19 @@ int WINAPI WinMain(
 
     DWnd d2(hInstance, IDD_PAGE_1, dwd.mainHWnd);
     DWnd d3(hInstance, IDD_PAGE_2, dwd.mainHWnd);
+    d2.AddCommandListener(IDC_B1, [](HWND hWnd, auto...) {
+        MessageBox(hWnd, L"你终于来了", L"bye bye", MB_OK | MB_ICONINFORMATION);
+    });
+    d2.AddMessageListener(WM_MOUSEMOVE, [](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+        auto x = GET_X_LPARAM(lParam);
+        auto y = GET_Y_LPARAM(lParam);
+
+        auto xstr = std::to_wstring(x);
+        auto ystr = std::to_wstring(y);
+        auto str = xstr + L", " + ystr;
+
+        SetDlgItemText(hWnd, IDC_EDIT1, str.c_str());
+    });
 
     dwd.AddTabPage(IDC_TAB1, { L"登录", 0, d2.mainHWnd });
     dwd.AddTabPage(IDC_TAB1, { L"注册", 1, d3.mainHWnd });
