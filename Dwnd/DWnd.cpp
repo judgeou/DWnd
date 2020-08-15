@@ -160,6 +160,11 @@ void DWnd::Hide()
 	ShowWindow(mainHWnd, SW_HIDE);
 }
 
+HWND DWnd::GetControl(int rcid)
+{
+	return GetDlgItem(mainHWnd, rcid);
+}
+
 INT_PTR WINAPI DWnd::WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_INITDIALOG) {

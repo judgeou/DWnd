@@ -151,9 +151,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ControlModel.h" />
     <ClInclude Include="DWnd.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ControlModel.cpp" />
     <ClCompile Include="DWnd.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

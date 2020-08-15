@@ -18,9 +18,15 @@
     <ClInclude Include="DWnd.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ControlModel.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DWnd.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ControlModel.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

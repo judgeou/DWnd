@@ -31,6 +31,7 @@ public:
 	void AddTabPage(int tabid, const TabPage& page);
 	void SelectTabPage(int tabid, int index);
 	void Hide();
+	HWND GetControl(int rcid);
 private:
 	static INT_PTR WINAPI WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	INT_PTR InternalWindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
