@@ -3,11 +3,13 @@
 
 std::map<HWND, DWnd*> DWnd::dWndThisMap;
 
-DWnd::DWnd(HMODULE hInstance, int rcid) {
+DWnd::DWnd(HMODULE hInstance, int rcid, HWND fatherHwnd) {
 	this->dpiFactor = 1;
-	this->mainHWnd = nullptr;
+	this->fatherHwnd = fatherHwnd;
 	this->hInstance = hInstance;
 	this->rcid = rcid;
+
+	mainHWnd = CreateDialogParam(hInstance, MAKEINTRESOURCE(rcid), fatherHwnd, WindProc, (LPARAM)this);
 }
 
 DWnd::~DWnd()
@@ -19,7 +21,7 @@ DWnd::~DWnd()
 
 INT_PTR DWnd::Run(bool selfMessageLoop)
 {
-	auto hWnd = CreateDialogParam(hInstance, MAKEINTRESOURCE(rcid), NULL, WindProc, (LPARAM)this);
+	auto hWnd = mainHWnd;
 
 	// 添加默认事件处理器
 	AddMessageListener(WM_CLOSE, [](HWND hWnd, auto...args) { DestroyWindow(hWnd); });
@@ -82,7 +84,75 @@ void DWnd::RemoveCommandListener(int command, std::list<DWnd::MsgHandler>::const
 
 void DWnd::AddTabPage(int tabid, const TabPage& page)
 {
-	allTabPages[tabid].push_back(page);
+	auto& tabPages = allTabPages[tabid];
+	tabPages.push_back(page);
+
+	// 处理tab的初始化
+	auto tabWnd = GetDlgItem(mainHWnd, tabid);
+
+	RECT tabRect;
+	GetWindowRect(tabWnd, &tabRect);
+
+	auto left = 1 * dpiFactor;
+	auto top = 20 * dpiFactor;
+	auto sx = tabRect.right - tabRect.left - left * 2;
+	auto sy = tabRect.bottom - tabRect.top - top - dpiFactor;
+
+	TCITEM tie;
+	tie.mask = TCIF_TEXT;
+	tie.pszText = (WCHAR*)page.title.c_str();
+	TabCtrl_InsertItem(tabWnd, page.index, &tie);
+
+	if (page.hWnd) {
+		// 重新设置父窗口
+		SetParent(page.hWnd, tabWnd);
+		SetWindowPos(page.hWnd, HWND_TOP, left, top, sx, sy, SWP_HIDEWINDOW);
+	}
+
+	// 当一个tab第一次添加page的时候添加监听事件
+	if (tabPages.size() == 1) {
+		// 必须要实现多次监听消息
+		AddMessageListener(WM_NOTIFY, [tabWnd, tabid, &tabPages](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+			switch (((LPNMHDR)lParam)->code)
+			{
+			case TCN_SELCHANGE:
+			{
+				int iPage = TabCtrl_GetCurSel(tabWnd);
+				for (auto& page : tabPages) {
+					if (page.hWnd) {
+						ShowWindow(page.hWnd, (iPage == page.index) ? SW_SHOW : SW_HIDE);
+					}
+				}
+
+				break;
+			}
+			default:
+				break;
+			}
+		});
+
+		// 默认设置第一个tab为选中
+		SelectTabPage(tabid, 0);
+	}
+}
+
+void DWnd::SelectTabPage(int tabid, int index)
+{
+	auto tabWnd = GetDlgItem(mainHWnd, tabid);
+	auto& tabPages = allTabPages[tabid];
+
+	TabCtrl_SetCurSel(tabWnd, index);
+	
+	for (auto& page : tabPages) {
+		if (page.hWnd) {
+			ShowWindow(page.hWnd, (index == page.index) ? SW_SHOW : SW_HIDE);
+		}
+	}
+}
+
+void DWnd::Hide()
+{
+	ShowWindow(mainHWnd, SW_HIDE);
 }
 
 INT_PTR WINAPI DWnd::WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -95,52 +165,6 @@ INT_PTR WINAPI DWnd::WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		auto hdc = GetDC(hWnd);
 		dwd->dpiFactor = GetDeviceCaps(hdc, LOGPIXELSX) / 96.0;
 		ReleaseDC(hWnd, hdc);
-
-		// 处理tab的初始化
-		for (auto& item : dwd->allTabPages) {
-			auto tabid = item.first;
-			auto tabWnd = GetDlgItem(hWnd, tabid);
-			
-			RECT tabRect;
-			GetWindowRect(tabWnd, &tabRect);
-
-			auto left = 1 * dwd->dpiFactor;
-			auto top = 20 * dwd->dpiFactor;
-			auto sx = tabRect.right - tabRect.left - left * 2;
-			auto sy = tabRect.bottom - tabRect.top - top - dwd->dpiFactor;
-			
-			for (auto& page : item.second) {
-				TCITEM tie;
-				tie.mask = TCIF_TEXT;
-				tie.pszText = (WCHAR*)page.title.c_str();
-				TabCtrl_InsertItem(tabWnd, page.index, &tie);
-
-				if (page.rcid) {
-					auto tabHwnd = CreateDialog(dwd->hInstance, MAKEINTRESOURCE(page.rcid), tabWnd, NULL);
-					SetWindowPos(tabHwnd, HWND_TOP, left, top, sx, sy, SWP_HIDEWINDOW);
-					page.hWnd = tabHwnd;
-				}
-			}
-			// 必须要实现多次监听消息
-			dwd->AddMessageListener(WM_NOTIFY, [tabWnd, tabid, dwd](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-				switch (((LPNMHDR)lParam)->code)
-				{
-				case TCN_SELCHANGE:
-				{
-					int iPage = TabCtrl_GetCurSel(tabWnd);
-					for (auto& page : dwd->allTabPages[tabid]) {
-						if (page.hWnd) {
-							ShowWindow(page.hWnd, (iPage == page.index) ? SW_SHOW : SW_HIDE);
-						}
-					}
-
-					break;
-				}
-				default:
-					break;
-				}
-			});
-		}
 	}
 
 	DWnd* dwd = dWndThisMap[hWnd];

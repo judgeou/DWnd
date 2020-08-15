@@ -13,11 +13,12 @@ public:
 	{
 		std::wstring title;
 		int index;
-		int rcid;
 		HWND hWnd;
 	};
 
-	DWnd(HMODULE hInstance, int rcid);
+	HWND mainHWnd;
+
+	DWnd(HMODULE hInstance, int rcid, HWND fatherHwnd = NULL);
 	~DWnd();
 
 	INT_PTR Run(bool selfMessageLoop = true);
@@ -28,6 +29,8 @@ public:
 	void RemoveCommandListener(int command, std::list<DWnd::MsgHandler>::const_iterator index);
 
 	void AddTabPage(int tabid, const TabPage& page);
+	void SelectTabPage(int tabid, int index);
+	void Hide();
 private:
 	static INT_PTR WINAPI WindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	INT_PTR InternalWindProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -35,7 +38,7 @@ private:
 	static std::map<HWND, DWnd*> dWndThisMap;
 	HMODULE hInstance;
 	int rcid;
-	HWND mainHWnd;
+	HWND fatherHwnd;
 	double dpiFactor;
 	std::map<UINT, std::list<MsgHandler>> msgHandlerMap;
 	std::map<WORD, std::list<MsgHandler>> cmdHandlerMap;

@@ -39,9 +39,13 @@ int WINAPI WinMain(
         dwd.RemoveMessageListener(WM_LBUTTONUP, cb1);
     });
 
-    dwd.AddTabPage(IDC_TAB1, { L"登录", 0, IDD_PAGE_1 });
-    dwd.AddTabPage(IDC_TAB1, { L"注册", 1, IDD_PAGE_2 });
-    dwd.AddTabPage(IDC_TAB1, { L"修改密码", 2 });
+    DWnd d2(hInstance, IDD_PAGE_1, dwd.mainHWnd);
+    DWnd d3(hInstance, IDD_PAGE_2, dwd.mainHWnd);
+
+    dwd.AddTabPage(IDC_TAB1, { L"登录", 0, d2.mainHWnd });
+    dwd.AddTabPage(IDC_TAB1, { L"注册", 1, d3.mainHWnd });
+    dwd.AddTabPage(IDC_TAB1, { L"修改密码", 2, NULL });
+
 
     return dwd.Run();
 }
