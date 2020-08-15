@@ -160,13 +160,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="MiniWind.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MiniWind.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Source.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Dwnd\Dwnd.vcxproj">
+      <Project>{ea75a198-664d-4d8f-a93b-d6011c9fe099}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

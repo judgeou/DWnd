@@ -1,3 +1,2 @@
 LIBRARY MiniWind
 EXPORTS
-Run @1
