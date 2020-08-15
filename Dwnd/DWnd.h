@@ -22,8 +22,10 @@ public:
 
 	INT_PTR Run(bool selfMessageLoop = true);
 	std::list<DWnd::MsgHandler>::const_iterator AddMessageListener(UINT msg, MsgHandler cb);
-	void AddCommandListener(int command, MsgHandler cb);
+	std::list<DWnd::MsgHandler>::const_iterator AddCommandListener(int command, MsgHandler cb);
+	
 	void RemoveMessageListener(UINT msg, std::list<DWnd::MsgHandler>::const_iterator index);
+	void RemoveCommandListener(int command, std::list<DWnd::MsgHandler>::const_iterator index);
 
 	void AddTabPage(int tabid, const TabPage& page);
 private:
@@ -36,6 +38,6 @@ private:
 	HWND mainHWnd;
 	double dpiFactor;
 	std::map<UINT, std::list<MsgHandler>> msgHandlerMap;
-	std::map<WORD, MsgHandler> cmdHandlerMap;
+	std::map<WORD, std::list<MsgHandler>> cmdHandlerMap;
 	std::map<int, std::vector<TabPage>> allTabPages;
 };

@@ -1,13 +1,6 @@
 #include "DWnd.h"
 #include <CommCtrl.h>
 
-template<typename T, typename... U>
-size_t GetFunctionAddress(std::function<T(U...)> f) {
-	typedef T(fnType)(U...);
-	fnType** fnPointer = f.template target<fnType*>();
-	return (size_t)*fnPointer;
-}
-
 std::map<HWND, DWnd*> DWnd::dWndThisMap;
 
 DWnd::DWnd(HMODULE hInstance, int rcid) {
@@ -34,7 +27,9 @@ INT_PTR DWnd::Run(bool selfMessageLoop)
 	AddMessageListener(WM_COMMAND, [this](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		auto cmd = LOWORD(wParam);
 		auto cb = cmdHandlerMap[cmd];
-		if (cb) { cb(hWnd, msg, wParam, lParam); }
+		for (auto& call : cb) {
+			call(hWnd, msg, wParam, lParam);
+		}
 	});
 
 	// 对窗体做必要初始设置
@@ -56,22 +51,32 @@ INT_PTR DWnd::Run(bool selfMessageLoop)
 
 std::list<DWnd::MsgHandler>::const_iterator DWnd::AddMessageListener(UINT msg, MsgHandler cb)
 {
-	auto& hamdlers = msgHandlerMap[msg];
-	hamdlers.push_back(cb);
-	auto index = hamdlers.cend();
+	auto& handlers = msgHandlerMap[msg];
+	handlers.push_back(cb);
+	auto index = handlers.cend();
 	index--;
 	return index;
 }
 
-void DWnd::AddCommandListener(int command, MsgHandler cb)
+std::list<DWnd::MsgHandler>::const_iterator DWnd::AddCommandListener(int command, MsgHandler cb)
 {
-	cmdHandlerMap[command] = cb;
+	auto& handlers = cmdHandlerMap[command];
+	handlers.push_back(cb);
+	auto index = handlers.cend();
+	index--;
+	return index;
 }
 
 // 千万不要使用已经删除过的index，一定会出现异常
 void DWnd::RemoveMessageListener(UINT msg, std::list<DWnd::MsgHandler>::const_iterator index)
 {
 	auto& handlers = msgHandlerMap[msg];
+	handlers.erase(index);
+}
+
+void DWnd::RemoveCommandListener(int command, std::list<DWnd::MsgHandler>::const_iterator index)
+{
+	auto& handlers = cmdHandlerMap[command];
 	handlers.erase(index);
 }
 
