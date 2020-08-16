@@ -1,3 +1,6 @@
+#ifndef DWND_20200816
+#define DWND_20200816
+
 #include <map>
 #include <list>
 #include <vector>
@@ -24,6 +27,7 @@ public:
 	INT_PTR Run(bool selfMessageLoop = true);
 	std::list<DWnd::MsgHandler>::const_iterator AddMessageListener(UINT msg, MsgHandler cb);
 	std::list<DWnd::MsgHandler>::const_iterator AddCommandListener(int command, MsgHandler cb);
+	std::list<DWnd::MsgHandler>::const_iterator AddCommandEventListener(int rcid, WORD msg, MsgHandler cb);
 	
 	void RemoveMessageListener(UINT msg, std::list<DWnd::MsgHandler>::const_iterator index);
 	void RemoveCommandListener(int command, std::list<DWnd::MsgHandler>::const_iterator index);
@@ -43,5 +47,8 @@ private:
 	double dpiFactor;
 	std::map<UINT, std::list<MsgHandler>> msgHandlerMap;
 	std::map<WORD, std::list<MsgHandler>> cmdHandlerMap;
+	std::map<uint64_t, std::list<MsgHandler>> cmdEventHandlerMap;
 	std::map<int, std::vector<TabPage>> allTabPages;
 };
+
+#endif

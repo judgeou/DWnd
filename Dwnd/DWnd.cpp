@@ -45,7 +45,7 @@ INT_PTR DWnd::Run(bool selfMessageLoop)
 	// 消息循环
 	if (selfMessageLoop) {
 		MSG msg;
-		while (GetMessage(&msg, hWnd, 0, 0) > 0) {
+		while (GetMessage(&msg, NULL, 0, 0) > 0) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
@@ -72,6 +72,16 @@ std::list<DWnd::MsgHandler>::const_iterator DWnd::AddCommandListener(int command
 	auto index = handlers.cend();
 	index--;
 	return index;
+}
+
+std::list<DWnd::MsgHandler>::const_iterator DWnd::AddCommandEventListener(int rcid, WORD msg, MsgHandler cb)
+{
+	return AddCommandListener(rcid, [msg, cb](HWND hWnd, UINT msg_, WPARAM wParam, LPARAM lParam) {
+		auto code = HIWORD(wParam);
+		if (code == msg) {
+			cb(hWnd, msg_, wParam, lParam);
+		}
+    });
 }
 
 // 千万不要使用已经删除过的index，一定会出现异常

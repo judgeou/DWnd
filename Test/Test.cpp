@@ -1,7 +1,7 @@
 ﻿#include <stdio.h>
 #include <string>
 #include "resource.h"
-
+#include "../Dwnd/DWnd.h"
 #include "../Dwnd/ControlModel.h"
 
 int WINAPI WinMain(
@@ -57,18 +57,25 @@ int WINAPI WinMain(
 
         edit1_2 = str;
     });
-    d3.AddMessageListener(WM_LBUTTONUP, [](HWND hWnd, auto...) {
-        MessageBox(hWnd, L"你终于来了2", L"bye bye", MB_OK | MB_ICONINFORMATION);
-        });
 
     dwd.AddTabPage(IDC_TAB1, { L"登录", 0, d2.mainHWnd });
     dwd.AddTabPage(IDC_TAB1, { L"注册", 1, NULL });
     dwd.AddTabPage(IDC_TAB1, { L"修改密码", 2, NULL });
 
     dwd.AddTabPage(IDC_TAB2, { L"ABC", 0, d3.mainHWnd });
-    dwd.AddTabPage(IDC_TAB2, { L"DEF", 1, });
+    dwd.AddTabPage(IDC_TAB2, { L"DEF", 1, NULL });
 
+    ComboboxModel<std::wstring> combo1(d3, IDC_COMBO1);
+    combo1.AddItem({ L"1 ミヤコ", L"【物理】最前衛で、ひたすら敵の攻撃を避ける幽霊少女。" });
+    combo1.AddItem({ L"2 クウカ", L"【物理】前衛で囮となり、攻撃を引き付ける暴走ドＭ娘。" });
+    combo1.AddItem({ L"3 ニノン", L"【物理】中衛で、強力な範囲攻撃を操る、忍術の使い手。" });
 
+    static1 = (*combo1).value;
+    
+    d3.AddCommandEventListener(IDC_COMBO1, CBN_SELCHANGE, [&combo1, &static1](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+        // 此时下拉控件内部已经处理完变更，我们直接拿数据
+        static1 = (*combo1).value;
+    });
 
     return dwd.Run();
 }
