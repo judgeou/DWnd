@@ -52,7 +52,7 @@ private:
 	void update();
 };
 
-template<typename T>
+template<typename T = std::wstring>
 class ComboboxModel {
 public:
 	ComboboxModel(DWnd& dwd, int rcid): dwd(dwd), rcid(rcid) {
@@ -73,9 +73,15 @@ public:
 		}
 	}
 
+	void RemoveItem(int index) {
+		SendMessage(dwd.GetControl(rcid), CB_DELETESTRING, index, NULL);
+		items.erase(items.begin() + index);
+
+	}
+
 	void Select(int index) {
 		this->index = index;
-		SendMessage(dwd.GetControl(rcid), CB_SETCURSEL, index, 0);
+		SendMessage(dwd.GetControl(rcid), CB_SETCURSEL, index, NULL);
 	}
 
 	const ComboboxItem<T>& operator*() const {

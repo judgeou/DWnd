@@ -76,6 +76,7 @@ FONT 8, "Œ¢»Ì—≈∫⁄", 400, 0, 0x1
 BEGIN
     LTEXT           "TODO: ≤ºæ÷ OLE  Ù–‘“≥",IDC_STATIC1,7,23,106,8
     COMBOBOX        IDC_COMBO1,8,6,48,30,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "…æ≥˝",IDC_BUTTON1,70,4,50,14
 END
 
 

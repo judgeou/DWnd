@@ -69,12 +69,17 @@ int WINAPI WinMain(
     combo1.AddItem({ L"1 ミヤコ", L"【物理】最前衛で、ひたすら敵の攻撃を避ける幽霊少女。" });
     combo1.AddItem({ L"2 クウカ", L"【物理】前衛で囮となり、攻撃を引き付ける暴走ドＭ娘。" });
     combo1.AddItem({ L"3 ニノン", L"【物理】中衛で、強力な範囲攻撃を操る、忍術の使い手。" });
+    combo1.AddItem({ L"4 キョウカ", L"【魔法】後衛から強力な魔法で攻撃するちびっこ優等生。" });
 
     static1 = (*combo1).value;
     
     d3.AddCommandEventListener(IDC_COMBO1, CBN_SELCHANGE, [&combo1, &static1](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         // 此时下拉控件内部已经处理完变更，我们直接拿数据
         static1 = (*combo1).value;
+    });
+
+    d3.AddCommandListener(IDC_BUTTON1, [&combo1](auto...) {
+        combo1.RemoveItem(3);
     });
 
     return dwd.Run();
