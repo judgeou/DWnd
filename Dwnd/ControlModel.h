@@ -55,6 +55,8 @@ private:
 template<typename T = std::wstring>
 class ComboboxModel {
 public:
+	int index;
+
 	ComboboxModel(DWnd& dwd, int rcid): dwd(dwd), rcid(rcid) {
 		index = 0;
 
@@ -79,6 +81,12 @@ public:
 
 	}
 
+	void ClearItem() {
+		for (auto i = items.size(); i > 0; i--) {
+			RemoveItem(0);
+		}
+	}
+
 	void Select(int index) {
 		this->index = index;
 		SendMessage(dwd.GetControl(rcid), CB_SETCURSEL, index, NULL);
@@ -90,7 +98,7 @@ public:
 private:
 	DWnd& dwd;
 	int rcid;
-	int index;
+
 	std::vector<ComboboxItem<T>> items;
 };
 
