@@ -97,6 +97,11 @@ void DWnd::RemoveCommandListener(int command, std::list<DWnd::MsgHandler>::const
 	handlers.erase(index);
 }
 
+void DWnd::RemoveCommandEventListener(int command, std::list<DWnd::MsgHandler>::const_iterator index)
+{
+	RemoveCommandListener(command, index);
+}
+
 void DWnd::AddTabPage(int tabid, const TabPage& page)
 {
 	auto& tabPages = allTabPages[tabid];

@@ -31,6 +31,7 @@ public:
 	
 	void RemoveMessageListener(UINT msg, std::list<DWnd::MsgHandler>::const_iterator index);
 	void RemoveCommandListener(int command, std::list<DWnd::MsgHandler>::const_iterator index);
+	void RemoveCommandEventListener(int command, std::list<DWnd::MsgHandler>::const_iterator index);
 
 	void AddTabPage(int tabid, const TabPage& page);
 	void SelectTabPage(int tabid, int index);
