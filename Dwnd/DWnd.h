@@ -33,8 +33,9 @@ public:
 	std::list<DWnd::MsgHandler>::const_iterator AddCommandEventListener(int rcid, WORD msg, MsgHandler cb);
 	
 	void RemoveMessageListener(UINT msg, std::list<DWnd::MsgHandler>::const_iterator index);
-	void RemoveCommandListener(int command, std::list<DWnd::MsgHandler>::const_iterator index);
-	void RemoveCommandEventListener(int command, std::list<DWnd::MsgHandler>::const_iterator index);
+	void RemoveNotifyListener(std::list<DWnd::MsgHandler>::const_iterator index);
+	void RemoveCommandListener(std::list<DWnd::MsgHandler>::const_iterator index);
+	void RemoveCommandEventListener(std::list<DWnd::MsgHandler>::const_iterator index);
 
 	void Hide();
 	HWND GetControl(int rcid) const;
@@ -48,8 +49,6 @@ private:
 	HWND fatherHwnd;
 
 	std::map<UINT, std::list<MsgHandler>> msgHandlerMap;
-	std::map<WORD, std::list<MsgHandler>> cmdHandlerMap;
-	std::map<uint64_t, std::list<MsgHandler>> cmdEventHandlerMap;
 };
 
 #endif

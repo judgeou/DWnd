@@ -31,13 +31,6 @@ INT_PTR DWnd::Run(bool selfMessageLoop)
 	// 添加默认事件处理器
 	AddMessageListener(WM_CLOSE, [](HWND hWnd, auto...args) { DestroyWindow(hWnd); });
 	AddMessageListener(WM_DESTROY, [](auto...args) { PostQuitMessage(0); });
-	AddMessageListener(WM_COMMAND, [this](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-		auto cmd = LOWORD(wParam);
-		auto cb = cmdHandlerMap[cmd];
-		for (auto& call : cb) {
-			call(hWnd, msg, wParam, lParam);
-		}
-	});
 
 	// 对窗体做必要初始设置
 	ShowWindow(hWnd, SW_SHOW);
@@ -77,11 +70,13 @@ std::list<DWnd::MsgHandler>::const_iterator DWnd::AddNotifyListener(int rcid, UI
 
 std::list<DWnd::MsgHandler>::const_iterator DWnd::AddCommandListener(int command, MsgHandler cb)
 {
-	auto& handlers = cmdHandlerMap[command];
-	handlers.push_back(cb);
-	auto index = handlers.cend();
-	index--;
-	return index;
+	return AddMessageListener(WM_COMMAND, [command, cb](HWND hWnd, UINT msg_, WPARAM wParam, LPARAM lParam) {
+		auto cmd = LOWORD(wParam);
+
+		if (cmd == command) {
+			cb(hWnd, msg_, wParam, lParam);
+		}
+	});
 }
 
 std::list<DWnd::MsgHandler>::const_iterator DWnd::AddCommandEventListener(int rcid, WORD msg, MsgHandler cb)
@@ -101,15 +96,21 @@ void DWnd::RemoveMessageListener(UINT msg, std::list<DWnd::MsgHandler>::const_it
 	handlers.erase(index);
 }
 
-void DWnd::RemoveCommandListener(int command, std::list<DWnd::MsgHandler>::const_iterator index)
+void DWnd::RemoveNotifyListener(std::list<DWnd::MsgHandler>::const_iterator index)
 {
-	auto& handlers = cmdHandlerMap[command];
+	auto& handlers = msgHandlerMap[WM_NOTIFY];
 	handlers.erase(index);
 }
 
-void DWnd::RemoveCommandEventListener(int command, std::list<DWnd::MsgHandler>::const_iterator index)
+void DWnd::RemoveCommandListener(std::list<DWnd::MsgHandler>::const_iterator index)
 {
-	RemoveCommandListener(command, index);
+	auto& handlers = msgHandlerMap[WM_COMMAND];
+	handlers.erase(index);
+}
+
+void DWnd::RemoveCommandEventListener(std::list<DWnd::MsgHandler>::const_iterator index)
+{
+	RemoveCommandListener(index);
 }
 
 void DWnd::Hide()
