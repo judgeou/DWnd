@@ -65,6 +65,16 @@ std::list<DWnd::MsgHandler>::const_iterator DWnd::AddMessageListener(UINT msg, M
 	return index;
 }
 
+std::list<DWnd::MsgHandler>::const_iterator DWnd::AddNotifyListener(int rcid, UINT msg, MsgHandler cb)
+{
+	return AddMessageListener(WM_NOTIFY, [msg, rcid, cb](HWND hWnd, UINT msg_, WPARAM wParam, LPARAM lParam) {
+		auto lpn = (LPNMHDR)lParam;
+		if (lpn->code == msg && lpn->idFrom == rcid) {
+			cb(hWnd, msg_, wParam, lParam);
+		}
+	});
+}
+
 std::list<DWnd::MsgHandler>::const_iterator DWnd::AddCommandListener(int command, MsgHandler cb)
 {
 	auto& handlers = cmdHandlerMap[command];
@@ -102,80 +112,12 @@ void DWnd::RemoveCommandEventListener(int command, std::list<DWnd::MsgHandler>::
 	RemoveCommandListener(command, index);
 }
 
-void DWnd::AddTabPage(int tabid, const TabPage& page)
-{
-	auto& tabPages = allTabPages[tabid];
-	tabPages.push_back(page);
-
-	// 处理tab的初始化
-	auto tabWnd = GetDlgItem(mainHWnd, tabid);
-
-	RECT tabRect;
-	GetWindowRect(tabWnd, &tabRect);
-
-	auto left = 1 * dpiFactor;
-	auto top = 20 * dpiFactor;
-	auto sx = tabRect.right - tabRect.left - left * 2;
-	auto sy = tabRect.bottom - tabRect.top - top - dpiFactor;
-
-	TCITEM tie;
-	tie.mask = TCIF_TEXT;
-	tie.pszText = (WCHAR*)page.title.c_str();
-	TabCtrl_InsertItem(tabWnd, page.index, &tie);
-
-	if (page.hWnd) {
-		// 重新设置父窗口
-		SetParent(page.hWnd, tabWnd);
-		SetWindowPos(page.hWnd, HWND_TOP, left, top, sx, sy, SWP_HIDEWINDOW);
-	}
-
-	// 当一个tab第一次添加page的时候添加监听事件
-	if (tabPages.size() == 1) {
-		// 必须要实现多次监听消息
-		AddMessageListener(WM_NOTIFY, [tabWnd, tabid, &tabPages](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-			switch (((LPNMHDR)lParam)->code)
-			{
-			case TCN_SELCHANGE:
-			{
-				int iPage = TabCtrl_GetCurSel(tabWnd);
-				for (auto& page : tabPages) {
-					if (page.hWnd) {
-						ShowWindow(page.hWnd, (iPage == page.index) ? SW_SHOW : SW_HIDE);
-					}
-				}
-
-				break;
-			}
-			default:
-				break;
-			}
-		});
-
-		// 默认设置第一个tab为选中
-		SelectTabPage(tabid, 0);
-	}
-}
-
-void DWnd::SelectTabPage(int tabid, int index)
-{
-	auto tabWnd = GetDlgItem(mainHWnd, tabid);
-	auto& tabPages = allTabPages[tabid];
-
-	TabCtrl_SetCurSel(tabWnd, index);
-	
-	for (auto& page : tabPages) {
-		if (page.hWnd) {
-			ShowWindow(page.hWnd, (index == page.index) ? SW_SHOW : SW_HIDE);
-		}
-	}
-}
-
 void DWnd::Hide()
 {
 	ShowWindow(mainHWnd, SW_HIDE);
 }
 
-HWND DWnd::GetControl(int rcid)
+HWND DWnd::GetControl(int rcid) const
 {
 	return GetDlgItem(mainHWnd, rcid);
 }

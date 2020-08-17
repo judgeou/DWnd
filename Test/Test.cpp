@@ -18,13 +18,16 @@ int WINAPI WinMain(
     EditModel edit1_2(d2, IDC_EDIT1);
     StaticModel static1(d3.GetControl(IDC_STATIC1));
     ComboboxModel<std::wstring> combo1(d3, IDC_COMBO1);
+    
+    TabModel tab1(dwd, IDC_TAB1);
+    TabModel tab2(dwd, IDC_TAB2);
 
-    dwd.AddTabPage(IDC_TAB1, { L"登录", 0, d2.mainHWnd });
-    dwd.AddTabPage(IDC_TAB1, { L"注册", 1, NULL });
-    dwd.AddTabPage(IDC_TAB1, { L"修改密码", 2, NULL });
+    tab1.AddPage({ L"登录", 0, d2.mainHWnd });
+    tab1.AddPage({ L"注册", 1, NULL });
+    tab1.AddPage({ L"修改密码", 2, NULL });
 
-    dwd.AddTabPage(IDC_TAB2, { L"ABC", 0, d3.mainHWnd });
-    dwd.AddTabPage(IDC_TAB2, { L"DEF", 1, NULL });
+    tab2.AddPage({ L"角色", 0, d3.mainHWnd });
+    tab2.AddPage({ L"ABC", 1, NULL });
 
     combo1.AddItem({ L"1 ミヤコ", L"【物理】最前衛で、ひたすら敵の攻撃を避ける幽霊少女。" });
     combo1.AddItem({ L"2 クウカ", L"【物理】前衛で囮となり、攻撃を引き付ける暴走ドＭ娘。" });

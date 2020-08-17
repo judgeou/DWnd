@@ -102,4 +102,23 @@ private:
 	std::vector<ComboboxItem<T>> items;
 };
 
+class TabModel {
+public:
+	int index;
+
+	TabModel(DWnd& dwd, int rcid);
+	void AddPage(const TabPage& page);
+	void RemovePage(int index);
+	void SelectPage(int index);
+
+	const TabPage& operator*() const;
+	const TabPage& operator[](int index) const;
+
+private:
+	DWnd& dwd;
+	int rcid;
+
+	std::vector<TabPage> pages;
+};
+
 #endif
