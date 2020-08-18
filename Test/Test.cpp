@@ -18,6 +18,7 @@ int WINAPI WinMain(
     EditModel edit1_2(d2, IDC_EDIT1);
     StaticModel static1(d3.GetControl(IDC_STATIC1));
     ComboboxModel<std::wstring> combo1(d3, IDC_COMBO1);
+    CheckBoxModel cbox1(d2, IDC_CHECK1);
     
     TabModel tab1(dwd, IDC_TAB1);
     TabModel tab2(dwd, IDC_TAB2);
@@ -35,6 +36,12 @@ int WINAPI WinMain(
     combo1.AddItem({ L"4 キョウカ", L"【魔法】後衛から強力な魔法で攻撃するちびっこ優等生。" });
 
     static1 = (*combo1).value;
+
+    cbox1.OnChange([&cbox1](const char& value) {
+        std::wstring title = value == 0 ? L"No" : L"Yes";
+        cbox1.SetTitle(title);
+    });
+    cbox1 = 1;
 
     dwd.AddMessageListener(WM_MOUSEMOVE, [](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         auto x = GET_X_LPARAM(lParam);

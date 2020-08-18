@@ -15,10 +15,15 @@ struct ComboboxItem {
 template<typename T>
 class ControlModel {
 public:
+	typedef std::function<void(const T& value)> ValueChangeHandler;
+
 	void operator=(const T& newval) {
 		if (_value != newval) {
 			_value = newval;
 			update();
+			for (auto& cb : changeCbList) {
+				cb(_value);
+			}
 		}
 	}
 
@@ -26,9 +31,21 @@ public:
 		return _value;
 	}
 
+	auto OnChange(ValueChangeHandler cb) {
+		changeCbList.push_back(cb);
+		auto index = changeCbList.cend();
+		index--;
+		return index;
+	}
+
 protected:
 	T _value;
+	std::list<ValueChangeHandler> changeCbList;
+
 	virtual void update() = 0;
+	virtual void updateView() {
+
+	}
 };
 
 class EditModel : public ControlModel<std::wstring> {
@@ -119,6 +136,18 @@ private:
 	int rcid;
 
 	std::vector<TabPage> pages;
+};
+
+class CheckBoxModel : public ControlModel<char> {
+public:
+	using ControlModel::operator=;
+	using ControlModel::operator*;
+	CheckBoxModel(DWnd& dwd, int rcid);
+	void SetTitle(const std::wstring& title);
+private:
+	DWnd& dwd;
+	int rcid;
+	void update();
 };
 
 #endif
