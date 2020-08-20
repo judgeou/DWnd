@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="ControlModel.h" />
     <ClInclude Include="DWnd.h" />
+    <ClInclude Include="HandleWrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ControlModel.cpp" />

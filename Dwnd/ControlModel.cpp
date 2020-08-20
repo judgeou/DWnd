@@ -105,3 +105,29 @@ const TabPage& TabModel::operator[](int index) const
 {
 	return pages[index];
 }
+
+CheckBoxModel::CheckBoxModel(DWnd& dwd, int rcid): dwd(dwd), rcid(rcid)
+{
+	dwd.AddCommandEventListener(rcid, BN_CLICKED, [this](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+		auto state = Button_GetCheck((HWND)lParam);
+		this->operator=(state);
+	});
+}
+
+void CheckBoxModel::SetTitle(const std::wstring& title)
+{
+	SetWindowText(dwd.GetControl(rcid), title.c_str());
+}
+
+void CheckBoxModel::update()
+{
+	if (_value == 0) {
+		Button_SetCheck(dwd.GetControl(rcid), BST_UNCHECKED);
+	}
+	else if (_value == 1) {
+		Button_SetCheck(dwd.GetControl(rcid), BST_CHECKED);
+	}
+	else {
+		Button_SetCheck(dwd.GetControl(rcid), BST_INDETERMINATE);
+	}
+}
