@@ -36,7 +36,7 @@ int WINAPI WinMain(
 
     static1 = (*combo1).value;
 
-    dwd.AddMessageListener(WM_MOUSEMOVE, [](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    dwd.AddMessageListener(WM_MOUSEMOVE, [&edit1](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         auto x = GET_X_LPARAM(lParam);
         auto y = GET_Y_LPARAM(lParam);
 
@@ -44,8 +44,8 @@ int WINAPI WinMain(
         auto ystr = std::to_wstring(y);
         auto str = xstr + L", " + ystr;
 
-        SetDlgItemText(hWnd, IDC_EDIT1, str.c_str());
-        });
+        edit1 = str;
+    });
 
     dwd.AddCommandListener(IDC_BUTTON1, [](HWND hWnd, auto...) {
         MessageBox(hWnd, L"拜拜了您", L"bye bye", MB_OK | MB_ICONINFORMATION);
@@ -57,8 +57,12 @@ int WINAPI WinMain(
         });
 
     dwd.AddCommandListener(IDC_BUTTON2, [&dwd, &cb1](auto...) {
-        dwd.RemoveMessageListener(WM_LBUTTONUP, cb1);
-        });
+        static bool ok = true;
+        if (ok) {
+            dwd.RemoveMessageListener(WM_LBUTTONUP, cb1);
+            ok = false;
+        }
+    });
 
     d2.AddCommandListener(IDC_B1, [&edit1_2, &static1](HWND hWnd, auto...) {
         static1 = *edit1_2;
