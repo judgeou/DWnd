@@ -4,6 +4,8 @@
 #include "../Dwnd/DWnd.h"
 #include "../Dwnd/ControlModel.h"
 
+using std::wstring;
+
 int WINAPI WinMain(
     _In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
@@ -19,6 +21,15 @@ int WINAPI WinMain(
     StaticModel static1(d3.GetControl(IDC_STATIC1));
     ComboboxModel<std::wstring> combo1(d3, IDC_COMBO1);
     CheckBoxModel cbox1(d2, IDC_CHECK1);
+
+    RadioButtonModel<wstring> radioGroup1(d2, {
+        { IDC_RADIO1, L"物理VALUE" },
+        { IDC_RADIO2, L"魔法VALUE" }
+    });
+    RadioButtonModel<wstring> radioGroup2(d2, {
+        { IDC_RADIO3, L"范围VALUE" },
+        { IDC_RADIO4, L"单体VALUE" }
+    });
     
     TabModel tab1(dwd, IDC_TAB1);
     TabModel tab2(dwd, IDC_TAB2);
@@ -36,6 +47,17 @@ int WINAPI WinMain(
     combo1.AddItem({ L"4 キョウカ", L"【魔法】後衛から強力な魔法で攻撃するちびっこ優等生。" });
 
     static1 = (*combo1).value;
+
+    radioGroup1 = IDC_RADIO1;
+    radioGroup2 = IDC_RADIO3;
+
+    radioGroup1.OnChange([&d2](const wstring& str) {
+        SetWindowText(d2.GetControl(IDC_B1), str.c_str());
+    });
+
+    radioGroup2.OnChange([&d2](const wstring& str) {
+        SetWindowText(d2.GetControl(IDC_B1), str.c_str());
+    });
 
     cbox1.OnChange([&cbox1](const char& value) {
         std::wstring title = value == 0 ? L"No" : L"Yes";
@@ -71,9 +93,12 @@ int WINAPI WinMain(
         }
     });
 
-    d2.AddCommandListener(IDC_B1, [&edit1_2, &static1](HWND hWnd, auto...) {
+    d2.AddCommandListener(IDC_B1, [&edit1_2, &static1, &radioGroup1, &radioGroup2](HWND hWnd, auto...) {
         static1 = *edit1_2;
-        });
+        radioGroup1 = IDC_RADIO2;
+        radioGroup2 = IDC_RADIO4;
+    });
+
     d2.AddMessageListener(WM_MOUSEMOVE, [&edit1_2, &static1](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         auto x = GET_X_LPARAM(lParam);
         auto y = GET_Y_LPARAM(lParam);

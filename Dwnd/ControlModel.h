@@ -21,9 +21,7 @@ public:
 		if (_value != newval) {
 			_value = newval;
 			update();
-			for (auto& cb : changeCbList) {
-				cb(_value);
-			}
+			invokeHandlers();
 		}
 	}
 
@@ -43,8 +41,10 @@ protected:
 	std::list<ValueChangeHandler> changeCbList;
 
 	virtual void update() = 0;
-	virtual void updateView() {
-
+	void invokeHandlers() {
+		for (auto& cb : changeCbList) {
+			cb(_value);
+		}
 	}
 };
 
@@ -148,6 +148,54 @@ private:
 	DWnd& dwd;
 	int rcid;
 	void update();
+};
+
+template<typename T = std::wstring>
+class RadioButtonModel : public ControlModel<T> {
+public:
+	void operator=(const int& rcid) {
+		selectedRcid = rcid;
+		update();
+		this->invokeHandlers();
+	}
+	const T& operator*() {
+		return rcidmap[selectedRcid];
+	}
+
+	RadioButtonModel(DWnd& dwd, const std::map<int, T>& rcidmap): dwd(dwd), rcidmap(rcidmap) {
+		for (auto& rciditem : rcidmap) {
+			auto rcid = rciditem.first;
+			dwd.AddCommandEventListener(rcid, BN_CLICKED, [this, rcid](HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+				auto state = Button_GetCheck((HWND)lParam);
+				if (state == 1) {
+					this->selectedRcid = rcid;
+					this->invokeHandlers();
+				}
+			});
+		}
+	}
+private:
+	DWnd& dwd;
+	std::map<int, T> rcidmap;
+	int selectedRcid = 0;
+
+	void update() {
+		int minrcid = 0;
+		int maxrcid = 0;
+
+		for (auto& item : rcidmap) {
+			if (minrcid == 0 || item.first < minrcid) { minrcid = item.first; }
+			if (maxrcid == 0 || item.first > maxrcid) { maxrcid = item.first; }
+		}
+
+		CheckRadioButton(dwd.mainHWnd, minrcid, maxrcid, selectedRcid);
+	}
+
+	void invokeHandlers() {
+		for (auto& cb : this->changeCbList) {
+			cb(rcidmap[selectedRcid]);
+		}
+	}
 };
 
 #endif
